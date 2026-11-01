@@ -1,0 +1,8 @@
+node_modules/
+src-tauri/target/
+src-tauri/gen/
+# sidecar build (PyInstaller) and its environment
+.venv/
+build/
+dist/
+*/__pycache__
