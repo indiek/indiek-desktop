@@ -23,7 +23,7 @@ All notable changes to the IndieK Desktop App are documented here.
 ### Changed
 - (DESKTOP:APP-ICON-HANKO) App icon set replaced with the IndieK hanko logo (regenerated with
   `tauri icon` from `logos/ik_logo_hanko.jpeg`, converted to a 1024 px PNG).
-- (DESKTOP:PACKAGING-TAURI P6) The sidecar takes `indiek-api` from PyPI, pinned to `0.17.0`
+- (DESKTOP:PACKAGING-TAURI P6) The sidecar takes `indiek-api` from PyPI, pinned to `0.17.1`
   (until 1.0.0 ships with the first desktop release), instead of the local `../fastAPI` path
   source: a fresh clone (and CI) builds on its own. README explains how to bundle unreleased API
   changes for one build.
