@@ -22,7 +22,9 @@ IndieK.app ── starts ──► sidecar: indiek_api --handshake --exit-on-std
 Work in progress (DESKTOP:PACKAGING-TAURI). **There is no installer yet**: today the app runs
 from source (development mode), or you can build an installer for your own computer (below).
 Done: P2 shell, P3 frozen sidecar, P4 local macOS build, P5 "Install ik Command…" menu (macOS,
-Linux). Next: P6 CI matrix (Windows, Linux) + version pins, P7 install docs for the released app.
+Linux), P6 version pins + CI checks + release workflow (see "Continuous integration and
+releases"). Next: the first run of the release workflow on all three OSes, P7 install docs for
+the released app.
 
 ## Install the released app
 
@@ -59,7 +61,11 @@ indiek/
 cd indiek/desktop
 npm install                                              # the Tauri CLI (pinned in package.json)
 (cd ../webUI/custom-graph-explorer && npm ci && npm run build)   # builds the UI into out/
+uv run python scripts/fetch_web_ui.py --from-dir ../webUI/custom-graph-explorer/out   # copies it into web-dist/
 ```
+
+The last line is only needed to build an installer or to run the Rust checks (they expect a
+`web-dist/` folder); `npm run dev` below serves the UI straight from `out/`.
 
 The first `npm run dev` also downloads and compiles the Rust crates (a few minutes, once).
 
@@ -94,7 +100,8 @@ the API's log. Quit the app normally (⌘Q / closing the window): the API stops 
 | `cargo: command not found` | Run `source ~/.cargo/env` or open a new terminal after installing Rust. |
 
 Checks for contributors: `cd src-tauri && cargo fmt --check && cargo clippy --all-targets && cargo test`,
-and `uv run pytest` for the sidecar entry point.
+and `uv run pytest` for the sidecar entry point and the web UI fetcher. CI runs the same checks
+on every push (see "Continuous integration and releases").
 
 ## The sidecar (`indiek-sidecar`)
 
@@ -149,25 +156,67 @@ With the prerequisites and checkouts of "Run from source" (steps 1 to 3):
 ```bash
 cd indiek/desktop
 uv sync && uv run pyinstaller --noconfirm sidecar/indiek-sidecar.spec   # the sidecar folder
+uv run python scripts/fetch_web_ui.py                                   # the web UI (see below)
 npm run build                                                           # the app + installer
 ```
 
 `npm run build` copies two resources into the app (`bundle.resources` in `tauri.conf.json`):
-`dist/indiek-sidecar/` and the built UI `../webUI/custom-graph-explorer/out/` (as `web/`). On
-macOS the results are in `src-tauri/target/release/bundle/`: `macos/IndieK.app` and
-`dmg/IndieK_<version>_<arch>.dmg`; open the `.dmg` and drag IndieK to Applications. The build is
-not signed; it uses your real workspace list and signing key, and macOS asks for keychain access
-the first time the new sidecar reads the key.
+`dist/indiek-sidecar/` and the built UI `web-dist/` (as `web/`). On macOS the results are in
+`src-tauri/target/release/bundle/`: `macos/IndieK.app` and `dmg/IndieK_<version>_<arch>.dmg`;
+open the `.dmg` and drag IndieK to Applications. The build is not signed; it uses your real
+workspace list and signing key, and macOS asks for keychain access the first time the new
+sidecar reads the key.
+
+### The web UI (`web-ui.lock.json`, `scripts/fetch_web_ui.py`)
+
+`web-dist/` is not committed. `web-ui.lock.json` pins the web UI release the app ships
+(repository `indiek/indiek-webui`, version, SHA-256 of the tarball); the script fills
+`web-dist/` (standard library only, no extra dependency):
+
+| Command (from `desktop/`) | What it does |
+| --- | --- |
+| `uv run python scripts/fetch_web_ui.py` | downloads `custom-graph-explorer-<version>-out.tar.gz` from the pinned GitHub Release, checks its SHA-256 against the lock file and unpacks it into `web-dist/` |
+| `uv run python scripts/fetch_web_ui.py --from-dir ../webUI/custom-graph-explorer/out` | copies a local UI build instead (to try unreleased UI changes; never used by CI) |
+| `uv run python scripts/fetch_web_ui.py --pin X.Y.Z` | moves the pin to a published UI release: writes its version and SHA-256 into `web-ui.lock.json` (commit that file) |
+
+If the download fails with `CERTIFICATE_VERIFY_FAILED` (the python.org installer for macOS
+ships without CA certificates), put `SSL_CERT_FILE=/etc/ssl/cert.pem` in front of the command.
+
+## Continuous integration and releases
+
+Two GitHub Actions workflows live in `.github/workflows/`:
+
+- `checks.yml`, on every push and pull request (Ubuntu 22.04): pytest, `cargo fmt --check`,
+  `cargo clippy` (warnings are errors) and `cargo test`.
+- `release.yml`, on a pushed version tag (`X.Y.Z`): builds the sidecar, fetches the pinned web
+  UI and builds the installers on three runners — macOS arm64 (`.app`, `.dmg`), Windows (`.msi`,
+  NSIS `.exe`) and Ubuntu 22.04 (`.AppImage`, `.deb`) — then gathers them with a
+  `SHA256SUMS.txt` into **one draft** GitHub Release. It can also be started by hand
+  (Actions tab → **Release desktop app** → **Run workflow**) to try the builds without a tag:
+  the installers are then only attached to the run as artifacts, with no version check and no
+  release.
+
+Release process:
+
+1. Set the same new version in `package.json`, `src-tauri/tauri.conf.json` and
+   `src-tauri/Cargo.toml`, and move the CHANGELOG "Unreleased" entries under it. The workflow
+   stops if the tag differs from any of the three.
+2. Commit, tag `X.Y.Z` (no `v` prefix) and push the tag.
+3. When `release.yml` is green, download and try the installers from the draft release, then
+   publish it on GitHub.
 
 ## Layout
 
 ```
 package.json             pinned Tauri CLI (npm run dev / build / tauri)
 pyproject.toml, uv.lock  the sidecar's Python environment (indiek-api, indiek, PyInstaller)
+web-ui.lock.json         pinned web UI release (repository, version, SHA-256)
+scripts/fetch_web_ui.py  fills web-dist/ from the pinned release or a local build
+web-dist/                the web UI bundled into the app (generated, not committed)
 sidecar/
   indiek_sidecar.py      entry point: `serve` or `ik`
   indiek-sidecar.spec    PyInstaller recipe, folder build (hidden imports for uvicorn and keyring backends)
-tests/                   pytest tests of the entry point
+tests/                   pytest tests of the entry point and the web UI fetcher
 ui/index.html            splash page shown until the API is ready (and its error messages)
 src-tauri/
   Cargo.toml, build.rs   the Rust crate
@@ -175,4 +224,7 @@ src-tauri/
   src/main.rs            sidecar lifecycle, handshake, navigation guard, app menu (+ unit tests)
   src/cli_install.rs     "Install ik Command…": writes the ~/.local/bin/ik launcher (+ unit tests)
   icons/                 hanko logo set (`npx tauri icon ../logos/ik_logo_hanko_1024.png`)
+.github/workflows/
+  checks.yml             tests, format and lint on every push
+  release.yml            installers for macOS, Windows, Linux → draft GitHub Release
 ```

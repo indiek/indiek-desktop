@@ -3,10 +3,13 @@ name: Release desktop app
 # Runs when the owner pushes a version tag (e.g. 0.2.0). Builds the installers on each OS
 # (PyInstaller cannot cross-compile) and attaches them to a DRAFT GitHub Release; the owner
 # checks it and publishes it by hand. The builds are not signed yet (owner decision 2026-10-24).
+# A manual run (Actions tab → "Run workflow") builds the same installers as workflow artifacts
+# only: no version check, no release.
 on:
   push:
     tags:
       - '*.*.*' # Matches 0.2.0, 1.0.0, etc.
+  workflow_dispatch:
 
 jobs:
   build:
@@ -27,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check tag matches the app version
+        if: github.event_name == 'push'
         shell: bash
         run: |
           pkg=$(node -p "require('./package.json').version")
@@ -88,6 +92,7 @@ jobs:
 
   # One job creates the release, so parallel builds never race to create several drafts.
   release:
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     permissions:

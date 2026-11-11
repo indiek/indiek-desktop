@@ -21,6 +21,12 @@ All notable changes to the IndieK Desktop App are documented here.
   `SHA256SUMS.txt` into one DRAFT GitHub Release the owner publishes).
 
 ### Changed
+- (DESKTOP:PACKAGING-TAURI P6) README: the installer build takes the web UI from `web-dist/`
+  (`scripts/fetch_web_ui.py`: pinned release, `--from-dir`, `--pin`, `SSL_CERT_FILE` tip); new
+  "Continuous integration and releases" section (checks, release workflow, release process);
+  Layout lists the lock file, the script, `web-dist/` and the workflows.
+- (DESKTOP:PACKAGING-TAURI P6) `release.yml` can be run by hand (`workflow_dispatch`): builds
+  the installers on the three OSes as workflow artifacts only (no tag check, no release).
 - (DESKTOP:APP-ICON-HANKO) App icon set replaced with the IndieK hanko logo (regenerated with
   `tauri icon` from `logos/ik_logo_hanko.jpeg`, converted to a 1024 px PNG).
 - (DESKTOP:PACKAGING-TAURI P6) The sidecar takes `indiek-api` from PyPI, pinned to `0.17.1`
