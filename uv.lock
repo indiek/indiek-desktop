@@ -244,7 +244,7 @@ keychain = [
 
 [[package]]
 name = "indiek-api"
-version = "0.16.0"
+version = "0.17.0"
 source = { directory = "../fastAPI" }
 dependencies = [
     { name = "fastapi" },

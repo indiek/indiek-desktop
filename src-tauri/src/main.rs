@@ -6,6 +6,9 @@
 //! 2026-10-30, project_management/Design.md "Desktop seams").
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#[cfg(unix)]
+mod cli_install;
+
 use std::io::{BufRead, BufReader, ErrorKind};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
@@ -25,6 +28,8 @@ const SIDECAR_NAME: &str = if cfg!(windows) {
     "indiek-sidecar"
 };
 const SHUTDOWN_GRACE: Duration = Duration::from_secs(5);
+#[cfg(unix)]
+const INSTALL_IK_MENU_ID: &str = "install-ik-command";
 
 /// The line printed by `python -m indiek_api --handshake`.
 #[derive(Deserialize)]
@@ -172,10 +177,99 @@ fn allowed_navigation(url: &Url) -> bool {
     }
 }
 
+/// Tauri's default menu plus "Install ik Command…" after the first entry of the first submenu
+/// (the app menu on macOS).
+#[cfg(unix)]
+fn add_install_ik_menu(app: &tauri::App) -> tauri::Result<()> {
+    use tauri::menu::{Menu, MenuItem, MenuItemKind};
+    let menu = Menu::default(app.handle())?;
+    let item = MenuItem::with_id(
+        app,
+        INSTALL_IK_MENU_ID,
+        "Install ik Command…",
+        true,
+        None::<&str>,
+    )?;
+    if let Some(MenuItemKind::Submenu(first)) = menu.items()?.into_iter().next() {
+        first.insert(&item, 1)?;
+    }
+    app.set_menu(menu)?;
+    Ok(())
+}
+
+/// Runs off the main thread: the dialogs block.
+#[cfg(unix)]
+fn install_ik_command(app: &AppHandle) {
+    use cli_install::Existing;
+    use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
+    const TITLE: &str = "Install ik Command";
+    let tell = |text: String, kind: MessageDialogKind| {
+        app.dialog()
+            .message(text)
+            .title(TITLE)
+            .kind(kind)
+            .blocking_show();
+    };
+    let paths = app.path();
+    let (Ok(resources), Ok(home)) = (paths.resource_dir(), paths.home_dir()) else {
+        return tell(
+            "The app folders could not be found.".into(),
+            MessageDialogKind::Error,
+        );
+    };
+    let sidecar = resources.join("indiek-sidecar").join(SIDECAR_NAME);
+    if !sidecar.is_file() {
+        return tell(
+            cli_install::NO_BUNDLED_CLI.into(),
+            MessageDialogKind::Warning,
+        );
+    }
+    let target = cli_install::launcher_path(&home);
+    if cli_install::existing(&target) == Existing::Foreign {
+        let replace = app
+            .dialog()
+            .message(cli_install::replace_question(&target))
+            .title(TITLE)
+            .kind(MessageDialogKind::Warning)
+            .buttons(MessageDialogButtons::OkCancelCustom(
+                "Replace".into(),
+                "Cancel".into(),
+            ))
+            .blocking_show();
+        if !replace {
+            return;
+        }
+    }
+    match cli_install::install(&target, &sidecar) {
+        Ok(()) => {
+            let dir = target.parent().unwrap_or(&home);
+            let on_path = cli_install::on_path(dir, std::env::var_os("PATH").as_deref());
+            tell(
+                cli_install::success_message(&target, on_path),
+                MessageDialogKind::Info,
+            );
+        }
+        Err(e) => tell(
+            format!("Could not write {}: {e}", target.display()),
+            MessageDialogKind::Error,
+        ),
+    }
+}
+
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(Sidecar(Mutex::new(None)))
+        .on_menu_event(|_app, _event| {
+            #[cfg(unix)]
+            if _event.id().as_ref() == INSTALL_IK_MENU_ID {
+                let handle = _app.clone();
+                std::thread::spawn(move || install_ik_command(&handle));
+            }
+        })
         .setup(|app| {
+            #[cfg(unix)]
+            add_install_ik_menu(app)?;
             WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
                 .title("IndieK")
                 .inner_size(1400.0, 900.0)

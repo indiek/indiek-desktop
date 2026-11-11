@@ -3,6 +3,18 @@
 All notable changes to the IndieK Desktop App are documented here.
 
 ## Unreleased
+
+### Added
+- (DESKTOP:PACKAGING-TAURI P5) "Install ik Command…" app-menu item (macOS, Linux): writes
+  `~/.local/bin/ik`, a shell launcher for the bundled `indiek-sidecar ik`, so the CLI shares the
+  app's keychain access. Asks before replacing an `ik` it did not write (symlinks are replaced,
+  never their targets); hints at the `PATH` line when needed. Native dialogs via
+  `tauri-plugin-dialog` (Rust side only; the page still has no IPC). Rust unit tests (7 new, 12).
+
+### Changed
+- (DESKTOP:APP-ICON-HANKO) App icon set replaced with the IndieK hanko logo (regenerated with
+  `tauri icon` from `logos/ik_logo_hanko.jpeg`, converted to a 1024 px PNG).
+
 ## 0.1.0 - 1 Nov 2026
 
 ### Added

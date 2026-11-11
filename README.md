@@ -21,8 +21,8 @@ IndieK.app ── starts ──► sidecar: indiek_api --handshake --exit-on-std
 
 Work in progress (DESKTOP:PACKAGING-TAURI). **There is no installer yet**: today the app runs
 from source (development mode), or you can build an installer for your own computer (below).
-Done: P2 shell, P3 frozen sidecar, P4 local macOS build. Next: P5 "Install `ik` command" menu,
-P6 CI matrix (Windows, Linux) + version pins, P7 install docs for the released app.
+Done: P2 shell, P3 frozen sidecar, P4 local macOS build, P5 "Install ik Command…" menu (macOS,
+Linux). Next: P6 CI matrix (Windows, Linux) + version pins, P7 install docs for the released app.
 
 ## Install the released app
 
@@ -123,6 +123,21 @@ macOS) while the OS checks the new files.
 exactly. On macOS, every newly built (unsigned) sidecar asks for keychain access the first time
 it reads the signing key.
 
+## Command-line `ik`
+
+The app menu (**IndieK → Install ik Command…** on macOS) puts the bundled CLI on your command
+line: it writes `~/.local/bin/ik`, a two-line shell launcher that runs
+`<app>/…/indiek-sidecar ik "$@"`. No administrator password is needed.
+
+- If `~/.local/bin` is not on your `PATH`, the dialog says so; add
+  `export PATH="$HOME/.local/bin:$PATH"` to `~/.zshrc` (or your shell's profile).
+- If `~/.local/bin/ik` already exists and was not written by the app (for example
+  `uv tool install indiek`), the app asks before replacing it (a symlink is replaced, never the
+  file it points to). A launcher written by the app is replaced silently: choose the menu item
+  again after moving the app.
+- The CLI and the app are the same binary, so `ik` uses the app's signing key without extra
+  keychain prompts. Not available on Windows yet (P6).
+
 ## Build an installer (your own computer)
 
 With the prerequisites and checkouts of "Run from source" (steps 1 to 3):
@@ -153,6 +168,7 @@ ui/index.html            splash page shown until the API is ready (and its error
 src-tauri/
   Cargo.toml, build.rs   the Rust crate
   tauri.conf.json        app id org.indiek.desktop, bundle (icons, resources), CSP of the splash page
-  src/main.rs            sidecar lifecycle, handshake, navigation guard (+ unit tests)
-  icons/                 placeholder icon.png and the platform set made from it (`npm run tauri icon src-tauri/icons/icon.png`)
+  src/main.rs            sidecar lifecycle, handshake, navigation guard, app menu (+ unit tests)
+  src/cli_install.rs     "Install ik Command…": writes the ~/.local/bin/ik launcher (+ unit tests)
+  icons/                 hanko logo set (`npx tauri icon ../logos/ik_logo_hanko_1024.png`)
 ```

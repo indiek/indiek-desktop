@@ -6,3 +6,4 @@ src-tauri/gen/
 build/
 dist/
 */__pycache__
+.DS_Store
