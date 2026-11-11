@@ -5,5 +5,7 @@ src-tauri/gen/
 .venv/
 build/
 dist/
+# web UI fetched by scripts/fetch_web_ui.py
+web-dist/
 */__pycache__
 .DS_Store

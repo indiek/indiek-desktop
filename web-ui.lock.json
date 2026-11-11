@@ -1,0 +1,5 @@
+{
+  "repository": "indiek/indiek-webui",
+  "version": "0.5.0",
+  "sha256": "TO-BE-PINNED: run `uv run python scripts/fetch_web_ui.py --pin 0.5.0` once the web UI release exists"
+}

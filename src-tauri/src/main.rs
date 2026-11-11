@@ -86,6 +86,14 @@ fn start_sidecar(app: &AppHandle) -> Result<Handshake, String> {
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::inherit());
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        // The sidecar is a console program: without this flag Windows opens a console window
+        // next to the app.
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
     match static_dir(&cmd) {
         Some(dir) => eprintln!("IndieK UI folder: {}", dir.display()),
         None => eprintln!("IndieK UI folder: none ({STATIC_DIR_ENV} is not set; / will be 404)"),

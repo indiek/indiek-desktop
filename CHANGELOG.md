@@ -10,6 +10,15 @@ All notable changes to the IndieK Desktop App are documented here.
   app's keychain access. Asks before replacing an `ik` it did not write (symlinks are replaced,
   never their targets); hints at the `PATH` line when needed. Native dialogs via
   `tauri-plugin-dialog` (Rust side only; the page still has no IPC). Rust unit tests (7 new, 12).
+- (DESKTOP:PACKAGING-TAURI P6) `web-ui.lock.json` pins the web UI release (repository, version,
+  SHA-256); `scripts/fetch_web_ui.py` (standard library only) downloads
+  `custom-graph-explorer-<version>-out.tar.gz`, checks its SHA-256 and unpacks it safely into
+  `web-dist/`; `--from-dir` copies a local build instead, `--pin VERSION` writes a published
+  release into the lock file. 27 new pytest tests.
+- (DESKTOP:PACKAGING-TAURI P6) GitHub Actions: `checks.yml` (pytest, rustfmt, clippy, cargo test
+  on Linux) and `release.yml` (on a version tag equal to the app version: installers built on
+  macOS arm64 (app, dmg), Windows (msi, NSIS) and Ubuntu 22.04 (AppImage, deb), gathered with a
+  `SHA256SUMS.txt` into one DRAFT GitHub Release the owner publishes).
 
 ### Changed
 - (DESKTOP:APP-ICON-HANKO) App icon set replaced with the IndieK hanko logo (regenerated with
@@ -18,6 +27,10 @@ All notable changes to the IndieK Desktop App are documented here.
   (until 1.0.0 ships with the first desktop release), instead of the local `../fastAPI` path
   source: a fresh clone (and CI) builds on its own. README explains how to bundle unreleased API
   changes for one build.
+- (DESKTOP:PACKAGING-TAURI P6) The bundled web UI (`web/` resource) now comes from `web-dist/`
+  (filled by `scripts/fetch_web_ui.py`) instead of the sibling `../webUI/custom-graph-explorer/out/`.
+- (DESKTOP:PACKAGING-TAURI P6) Windows: the sidecar starts without a console window
+  (`CREATE_NO_WINDOW`).
 
 ## 0.1.0 - 1 Nov 2026
 
