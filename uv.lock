@@ -245,27 +245,16 @@ keychain = [
 [[package]]
 name = "indiek-api"
 version = "0.17.0"
-source = { directory = "../fastAPI" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fastapi" },
     { name = "indiek", extra = ["keychain"] },
     { name = "python-dotenv" },
     { name = "uvicorn" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi", specifier = ">=0.139.0" },
-    { name = "indiek", extras = ["keychain"], specifier = ">=1.3.0" },
-    { name = "python-dotenv", specifier = ">=1.2.2" },
-    { name = "uvicorn", specifier = ">=0.51.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "httpx2", specifier = ">=2.13.1" },
-    { name = "pytest", specifier = ">=8.4.0" },
-    { name = "ruff", specifier = ">=0.15.21" },
+sdist = { url = "https://files.pythonhosted.org/packages/a1/cd/66ff636b8f0694401ee9086623711d2ab2b10d96d100847502c9452695a3/indiek_api-0.17.0.tar.gz", hash = "sha256:c23a04745a603011f3a21091bda0079876d724751e81e8f2c923acf376682d23", size = 684893, upload-time = "2026-11-01T13:27:02.536Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ce/e6/82c17a381f988b7f4b26d9139ee8fb3bc087ffcaf82d8743504f45f24aef/indiek_api-0.17.0-py3-none-any.whl", hash = "sha256:adf78db5b6b84abaa0bba131d2f3bb51f41013e9d6208bca06e26062aec75500", size = 35937, upload-time = "2026-11-01T13:27:01.042Z" },
 ]
 
 [[package]]
@@ -286,7 +275,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "indiek", extras = ["cli", "keychain"], specifier = "==1.3.0" },
-    { name = "indiek-api", directory = "../fastAPI" },
+    { name = "indiek-api", specifier = "==0.17.0" },
 ]
 
 [package.metadata.requires-dev]
