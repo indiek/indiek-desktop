@@ -56,6 +56,9 @@ First published release: installers for macOS (Apple silicon), Windows and Linux
   `_CodeSignature/CodeResources`). `tauri.conf.json` now ad-hoc signs the whole bundle
   (`bundle.macOS.signingIdentity: "-"`), so macOS offers "Open Anyway" like any unsigned app;
   `release.yml` fails the macOS job unless `codesign --verify --deep --strict` passes.
+- (DESKTOP:RELEASE-FLATTEN) `release.yml`: the release job failed at "Checksums" (`sha256sum: dmg: Is a
+  directory`) because the downloaded artifacts keep their `dmg/`, `msi/`, … folders; the step now moves
+  the installers up into one folder first, and fails if any folder remains.
 
 ## 0.1.0 - 1 Nov 2026
 

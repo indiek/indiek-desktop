@@ -114,9 +114,15 @@ jobs:
           path: installers
           merge-multiple: true
 
+      # upload-artifact keeps the bundle/<type>/ folders (dmg/, msi/, …): flatten them first.
       - name: Checksums
         working-directory: installers
-        run: sha256sum * > SHA256SUMS.txt
+        run: |
+          find . -mindepth 2 -type f -exec mv -n {} . \;
+          find . -mindepth 1 -type d -empty -delete
+          test -z "$(find . -mindepth 1 -type d)"
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
 
       - name: Create draft GitHub Release
         uses: softprops/action-gh-release@v2
