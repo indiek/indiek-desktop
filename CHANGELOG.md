@@ -4,6 +4,11 @@ All notable changes to the IndieK Desktop App are documented here.
 
 ## Unreleased
 
+## 0.2.0 - 13 Nov 2026
+
+First published release: installers for macOS (Apple silicon), Windows and Linux, bundling
+`indiek-api` 1.0.0, the web UI 0.5.0 and `indiek` 1.3.0 (CLI included).
+
 ### Added
 - `LICENSE` file (Apache-2.0, same text as the other IndieK repositories); the licence was only declared in `package.json` and `pyproject.toml` (FOSSDOCS:LICENSE-FILES).
 - (DESKTOP:PACKAGING-TAURI P5) "Install ik Command…" app-menu item (macOS, Linux): writes

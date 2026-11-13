@@ -2,7 +2,7 @@
 # `indiek-sidecar`, built with PyInstaller from sidecar/indiek-sidecar.spec.
 [project]
 name = "indiek-desktop-sidecar"
-version = "0.1.0"
+version = "0.2.0"
 description = "Frozen IndieK API and ik CLI bundled with IndieK Desktop."
 requires-python = ">=3.14"
 license = "Apache-2.0"
