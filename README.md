@@ -23,14 +23,33 @@ Work in progress (DESKTOP:PACKAGING-TAURI). **There is no installer yet**: today
 from source (development mode), or you can build an installer for your own computer (below).
 Done: P2 shell, P3 frozen sidecar, P4 local macOS build, P5 "Install ik Command…" menu (macOS,
 Linux), P6 version pins + CI checks + release workflow (see "Continuous integration and
-releases"). Next: the first run of the release workflow on all three OSes, P7 install docs for
-the released app.
+releases"); the first (manual) run of the release workflow built installers on all three OSes
+(2026-11-12); P7 install docs written (below and on indiek.org). Next: trying those installers,
+then the first tagged release.
 
 ## Install the released app
 
-Not available yet. Releases will be published on this repository's GitHub Releases page
-(macOS, Windows, Linux). The first builds are **not code-signed**: macOS and Windows will warn
-before the first launch; the exact steps will be listed here with the first release.
+First release coming soon on this repository's
+[Releases page](https://github.com/indiek/indiek-desktop/releases). Full user guide (download,
+first launch, author key, keychain, update, uninstall, troubleshooting):
+**[indiek.org/docs/desktop](https://indiek.org/docs/desktop/)**.
+
+| System | File |
+| --- | --- |
+| macOS, Apple silicon | `IndieK_<version>_aarch64.dmg` (Intel Macs: not yet) |
+| Windows 10/11, 64-bit | `IndieK_<version>_x64-setup.exe` or `IndieK_<version>_x64_en-US.msi` |
+| Linux, 64-bit | `IndieK_<version>_amd64.deb` (Debian, Ubuntu) or `IndieK_<version>_amd64.AppImage` |
+
+Check a download against the release's `SHA256SUMS.txt`. The first builds are **not
+code-signed**, so confirm once that you trust the app:
+
+- **macOS 15+**: open the app once (it is refused), then **System Settings → Privacy &
+  Security → Open Anyway**, and confirm. If macOS says the app "is damaged", run
+  `xattr -dr com.apple.quarantine /Applications/IndieK.app`. When asked for keychain access,
+  choose **Always Allow** (asked again after each update while builds are unsigned).
+- **Windows**: on *Windows protected your PC* (SmartScreen), **More info → Run anyway**.
+- **Linux**: `sudo apt install ./IndieK_<version>_amd64.deb`, or `chmod +x` the AppImage and
+  run it (may need `libfuse2`).
 
 ## Run from source (development mode)
 
@@ -228,3 +247,7 @@ src-tauri/
   checks.yml             tests, format and lint on every push
   release.yml            installers for macOS, Windows, Linux → draft GitHub Release
 ```
+
+## License
+
+Apache License 2.0: see [`LICENSE`](LICENSE).

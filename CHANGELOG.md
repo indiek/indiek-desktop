@@ -5,6 +5,7 @@ All notable changes to the IndieK Desktop App are documented here.
 ## Unreleased
 
 ### Added
+- `LICENSE` file (Apache-2.0, same text as the other IndieK repositories); the licence was only declared in `package.json` and `pyproject.toml` (FOSSDOCS:LICENSE-FILES).
 - (DESKTOP:PACKAGING-TAURI P5) "Install ik Command…" app-menu item (macOS, Linux): writes
   `~/.local/bin/ik`, a shell launcher for the bundled `indiek-sidecar ik`, so the CLI shares the
   app's keychain access. Asks before replacing an `ik` it did not write (symlinks are replaced,
@@ -37,6 +38,19 @@ All notable changes to the IndieK Desktop App are documented here.
   (filled by `scripts/fetch_web_ui.py`) instead of the sibling `../webUI/custom-graph-explorer/out/`.
 - (DESKTOP:PACKAGING-TAURI P6) Windows: the sidecar starts without a console window
   (`CREATE_NO_WINDOW`).
+- (DESKTOP:PACKAGING-TAURI P7) README "Install the released app": files per OS, checksums,
+  opening unsigned builds (macOS "Open Anyway" / `xattr`, Windows SmartScreen, Linux deb and
+  AppImage), "Always Allow" for the keychain; full guide on indiek.org/docs/desktop.
+- (DESKTOP:PACKAGING-TAURI P6) CI: the Linux apt step (`checks.yml`, `release.yml`) retries
+  downloads (`Acquire::Retries=3`) and times out after 15 min, after a runner DNS outage kept the
+  first manual release run stuck for 90 min.
+
+### Fixed
+- (DESKTOP:MACOS-ADHOC-SIGN) macOS: the installed app opened once, then Gatekeeper reported
+  "IndieK.app is damaged". The bundle was never sealed (main binary only linker-signed, no
+  `_CodeSignature/CodeResources`). `tauri.conf.json` now ad-hoc signs the whole bundle
+  (`bundle.macOS.signingIdentity: "-"`), so macOS offers "Open Anyway" like any unsigned app;
+  `release.yml` fails the macOS job unless `codesign --verify --deep --strict` passes.
 
 ## 0.1.0 - 1 Nov 2026
 

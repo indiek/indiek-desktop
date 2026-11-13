@@ -26,6 +26,9 @@
     "resources": {
       "../dist/indiek-sidecar/": "indiek-sidecar/",
       "../web-dist/": "web/"
+    },
+    "macOS": {
+      "signingIdentity": "-"
     }
   }
 }

@@ -43,9 +43,10 @@ jobs:
 
       - name: Linux libraries for Tauri
         if: runner.os == 'Linux'
+        timeout-minutes: 15
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -77,6 +78,15 @@ jobs:
         run: |
           npm ci
           npm run build -- --bundles ${{ matrix.bundles }}
+
+      # An unsealed bundle makes Gatekeeper report "IndieK.app is damaged" (no "Open Anyway").
+      - name: Check the macOS bundle signature (ad-hoc, sealed)
+        if: runner.os == 'macOS'
+        run: |
+          app=src-tauri/target/release/bundle/macos/IndieK.app
+          codesign --verify --deep --strict --verbose=2 "$app"
+          codesign -dv "$app"
+          test -f "$app/Contents/_CodeSignature/CodeResources"
 
       - name: Upload installers
         uses: actions/upload-artifact@v4
