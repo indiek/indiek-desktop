@@ -144,8 +144,8 @@ It is a folder (the program plus `_internal/`), not a single file: it starts in 
 instead of about 12 s. The first launch after an install or update is slower (about 15 s on
 macOS) while the OS checks the new files.
 
-`pyproject.toml` pins both Python packages exactly, from PyPI (`indiek-api==0.17.1`, then
-1.0.0 with the first desktop release; `indiek[cli,keychain]==1.3.0`), so a fresh clone builds
+`pyproject.toml` pins both Python packages exactly, from PyPI (`indiek-api==1.0.0`,
+`indiek[cli,keychain]==1.3.0`), so a fresh clone builds
 on its own and the sidecar ships exactly what was tested. To bundle unreleased API changes from a
 sibling `fastAPI/` checkout, install it over the pin for that build only:
 `uv pip install -e ../fastAPI` after `uv sync` (the next `uv sync` restores the pin), or add a
