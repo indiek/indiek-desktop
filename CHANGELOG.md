@@ -4,6 +4,11 @@ All notable changes to the IndieK Desktop App are documented here.
 
 ## Unreleased
 
+### Changed
+- README brought up to date after the 0.2.0 release: "Status" (released, what is not available
+  yet), "Install the released app" links to the latest release instead of "coming soon", release
+  process mentions `pyproject.toml`'s version (DESKTOP:AFTER-0.2.0).
+
 ## 0.2.0 - 13 Nov 2026
 
 First published release: installers for macOS (Apple silicon), Windows and Linux, bundling

@@ -19,19 +19,19 @@ IndieK.app ── starts ──► sidecar: indiek_api --handshake --exit-on-std
 
 ## Status
 
-Work in progress (DESKTOP:PACKAGING-TAURI). **There is no installer yet**: today the app runs
-from source (development mode), or you can build an installer for your own computer (below).
-Done: P2 shell, P3 frozen sidecar, P4 local macOS build, P5 "Install ik Command…" menu (macOS,
-Linux), P6 version pins + CI checks + release workflow (see "Continuous integration and
-releases"); the first (manual) run of the release workflow built installers on all three OSes
-(2026-11-12); P7 install docs written (below and on indiek.org). Next: trying those installers,
-then the first tagged release.
+**0.2.0 is released** (13 Nov 2026), the first published version: installers for macOS (Apple
+silicon), Windows and Linux, bundling `indiek-api` 1.0.0, the web UI 0.5.0 and `indiek` 1.3.0
+(CLI included). The installers are **not code-signed** yet (see below).
+
+Not yet available: code signing (macOS notarization, Windows), Intel Mac builds, the
+"Install ik Command…" menu on Windows, and in-app updates (install the new version over the old
+one).
 
 ## Install the released app
 
-First release coming soon on this repository's
-[Releases page](https://github.com/indiek/indiek-desktop/releases). Full user guide (download,
-first launch, author key, keychain, update, uninstall, troubleshooting):
+Download the installer for your system from the
+[latest release](https://github.com/indiek/indiek-desktop/releases/latest). Full user guide
+(download, first launch, author key, keychain, update, uninstall, troubleshooting):
 **[indiek.org/docs/desktop](https://indiek.org/docs/desktop/)**.
 
 | System | File |
@@ -166,7 +166,7 @@ line: it writes `~/.local/bin/ik`, a two-line shell launcher that runs
   file it points to). A launcher written by the app is replaced silently: choose the menu item
   again after moving the app.
 - The CLI and the app are the same binary, so `ik` uses the app's signing key without extra
-  keychain prompts. Not available on Windows yet (P6).
+  keychain prompts. Not available on Windows yet.
 
 ## Build an installer (your own computer)
 
@@ -219,7 +219,8 @@ Release process:
 
 1. Set the same new version in `package.json`, `src-tauri/tauri.conf.json` and
    `src-tauri/Cargo.toml`, and move the CHANGELOG "Unreleased" entries under it. The workflow
-   stops if the tag differs from any of the three.
+   stops if the tag differs from any of the three. Keep `pyproject.toml`'s version in step too
+   (not checked by the workflow).
 2. Commit, tag `X.Y.Z` (no `v` prefix) and push the tag.
 3. When `release.yml` is green, download and try the installers from the draft release, then
    publish it on GitHub.
